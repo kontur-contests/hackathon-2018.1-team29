@@ -26,8 +26,7 @@ all:
           mongo_host: localhost
           mongo_port: 27017
           mongo_dbname: telegram
-          rabbit_login: guest
-          rabbit_password: guest
+          rabbit_login: telegram
           rabbit_host: localhost
           rabbit_exchange: telegram_exchange
           rabbit_deadLetterExchange: telegram_deadletter

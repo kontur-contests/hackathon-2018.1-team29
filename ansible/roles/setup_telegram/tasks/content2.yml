@@ -4,3 +4,9 @@
        dest: "{{ app_home }}/ravop-plugins/telegram/prod.env"
        src: prod.env.j2
        owner: "{{ app_user }}"
+
+   - name: Copy nginx configuration
+     template:
+       dest: "/etc/nginx/conf.d/telegram.conf"
+       src: location.conf.j2
+

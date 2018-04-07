@@ -17,3 +17,6 @@
 - name: Install mongodb
   apt:
     name: mongodb-org
+
+- name: Start mongod
+  command: service mongod start

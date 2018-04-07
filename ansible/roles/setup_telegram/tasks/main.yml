@@ -5,10 +5,10 @@
    - name: Setup telegram
      include_tasks: "{{ task }}.yml"
      with_items:
-#       - node
-#       - content1
-#       - clone
-#       - unit
+       - node
+       - content1
+       - clone
+       - unit
        - content2
        - pull
        - install
