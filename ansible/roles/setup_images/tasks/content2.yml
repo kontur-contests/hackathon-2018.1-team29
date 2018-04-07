@@ -1,0 +1,12 @@
+---
+   - name: Copy production configuration
+     template:
+       dest: "{{ app_home }}/hackaton/server/images/prod.env"
+       src: prod.env.j2
+       owner: "{{ app_user }}"
+
+   - name: Copy nginx configuration
+     template:
+       dest: "/etc/nginx/conf.d/images.conf"
+       src: location.conf.j2
+

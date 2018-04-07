@@ -1,0 +1,11 @@
+---
+   - name: Configure service
+     template:
+       src: "service.j2"
+       dest: "/etc/systemd/system/{{ unit_name }}.service"
+
+   - name: Enable service
+     command: "{{ item }}"
+     with_items:
+       - systemctl daemon-reload
+       - "systemctl enable {{ unit_name }}.service"

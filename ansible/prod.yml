@@ -34,4 +34,11 @@ all:
           rabbit_remote_queue: telegram_remote
           rabbit_backup_queue: telegram_backup
           telegram_api_id: 187662
-          cellphone: 9022694743
+    ravop-images:
+      hosts:
+        hackaton-kontur1:
+          app_user: images
+          app_home: /home/images
+          unit_name: images
+          node_version: 8.7.0
+          port: 23456

@@ -1,0 +1,16 @@
+---
+   - name: Include encrypted variables
+     include_vars: "encrypted.yml"
+
+   - name: Setup telegram
+     include_tasks: "{{ task }}.yml"
+     with_items:
+       - node
+       - clone
+       - unit
+       - content2
+       - pull
+       - install
+       - restart
+     loop_control:
+       loop_var: task

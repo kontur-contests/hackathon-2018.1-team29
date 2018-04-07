@@ -1,0 +1,4 @@
+---
+- hosts: ravop-images
+  roles:
+    - setup_images

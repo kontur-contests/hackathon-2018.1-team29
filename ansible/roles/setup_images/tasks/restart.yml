@@ -1,0 +1,7 @@
+---
+   - name: Restart service
+     command: service {{ item }} restart
+     with_items:
+       - "{{ unit_name }}"
+       - nginx
+

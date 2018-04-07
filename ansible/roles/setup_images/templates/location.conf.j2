@@ -1,0 +1,12 @@
+server {
+    listen 80;
+    server_name images.ravop.ru;
+
+    location / {
+        etag off;
+        expires -1;
+        proxy_hide_header etag;
+
+        proxy_pass http://127.0.0.1:{{ port }}$request_uri;
+  }
+}

@@ -1,0 +1,9 @@
+---
+   - name: Install dependencies for repo
+     command: "{{ app_home }}/.nvm/nvm-exec npm install"
+     args:
+       chdir: "{{ app_home }}/hackaton/server"
+     become: yes
+     become_user: "{{ app_user }}"
+     environment:
+       NODE_VERSION: "{{ node_version }}"    

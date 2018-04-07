@@ -1,0 +1,16 @@
+[Unit]
+Description=Images plugin
+
+[Service]
+ExecStart={{ app_home }}/.nvm/nvm-exec npm run-script images-prod --prefix {{ app_home }}/hackaton/server
+Environment=NODE_VERSION={{ node_version }}
+Restart=always
+RestartSec=10
+StandardOutput=null
+StandardError=syslog
+SyslogIdentifier={{ unit_name }}
+User={{ app_user }}
+WorkingDirectory={{ app_home }}/hackaton/server
+
+[Install]
+WantedBy=multi-user.target
