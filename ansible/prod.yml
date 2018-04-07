@@ -1,0 +1,38 @@
+all:
+  hosts:
+    hackaton-kontur1:
+      ansible_host: 80.93.182.81
+  children:
+    ravop-nginx:
+      hosts:
+        hackaton-kontur1
+    ravop-postgresql:
+      hosts:
+        hackaton-kontur1
+    ravop-mongodb:
+      hosts:
+        hackaton-kontur1
+    ravop-rabbit:
+      hosts:
+        hackaton-kontur1
+    ravop-telegram:
+      hosts:
+        hackaton-kontur1:
+          app_user: telegram
+          app_home: /home/telegram
+          unit_name: telegram
+          node_version: 8.7.0
+          port: 12345
+          mongo_host: localhost
+          mongo_port: 27017
+          mongo_dbname: telegram
+          rabbit_login: guest
+          rabbit_password: guest
+          rabbit_host: localhost
+          rabbit_exchange: telegram_exchange
+          rabbit_deadLetterExchange: telegram_deadletter
+          rabbit_local_queue: telegram_local
+          rabbit_remote_queue: telegram_remote
+          rabbit_backup_queue: telegram_backup
+          telegram_api_id: 187662
+          cellphone: 9022694743

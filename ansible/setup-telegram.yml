@@ -1,0 +1,4 @@
+---
+- hosts: ravop-telegram
+  roles:
+    - setup_telegram

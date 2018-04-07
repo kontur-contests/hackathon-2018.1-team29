@@ -1,0 +1,3 @@
+---
+   - name: Restart service
+     command: service {{ unit_name }} restart

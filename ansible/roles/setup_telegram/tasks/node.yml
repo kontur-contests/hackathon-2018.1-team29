@@ -1,0 +1,27 @@
+---
+   - name: Create role user
+     user:
+       name: "{{ app_user }}"
+       home: "{{ app_home }}"
+
+   - name: Download nvm
+     get_url:
+       url: https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh
+       dest: "/var/tmp/nvm_install.sh"
+       mode: 0775
+       owner: "{{ app_user }}"
+
+   - name: Install nvm
+     shell: "/var/tmp/nvm_install.sh"
+     args:
+       chdir: "{{ app_home }}"
+     become: yes
+     become_user: "{{ app_user }}"
+
+   - name: Install nodejs
+     shell: /bin/bash -c "source ~/.nvm/nvm.sh && nvm install {{ node_version }}"
+     args:
+       chdir: "{{ app_home }}"
+     become: yes
+     become_user: "{{ app_user }}"
+

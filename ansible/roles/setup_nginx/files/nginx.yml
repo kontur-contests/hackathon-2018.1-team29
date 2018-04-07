@@ -1,0 +1,21 @@
+- type: log
+  enabled: true
+  paths:
+    - /var/log/nginx/access.log
+  fields:
+    type: nginx-access
+  fields_under_root: true
+  encoding: utf-8
+  exclude_files: [".gz"]
+  ignore_older: 3h
+
+- type: log
+  enabled: true
+  paths:
+    - /var/log/nginx/error.log
+  fields:
+    type: nginx-error
+  fields_under_root: true
+  encoding: utf-8
+  exclude_files: [".gz"]
+  ignore_older: 3h

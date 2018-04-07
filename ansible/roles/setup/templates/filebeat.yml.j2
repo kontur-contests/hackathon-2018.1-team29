@@ -1,0 +1,8 @@
+filebeat.config.prospectors:
+  enabled: true
+  path: /etc/filebeat/configs/*.yml
+
+output.logstash:
+    hosts: ["{{ ravop_logstash }}"]
+    loadbalance: true
+    ssl.enabled: true

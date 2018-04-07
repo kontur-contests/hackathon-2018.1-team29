@@ -1,0 +1,9 @@
+---
+   - name: Build target
+     command: "{{ app_home }}/.nvm/nvm-exec npm run telegram-build"
+     args:
+       chdir: "{{ app_home }}/ravop-plugins"
+     become: yes
+     become_user: "{{ app_user }}"
+     environment:
+       NODE_VERSION: "{{ node_version }}"    

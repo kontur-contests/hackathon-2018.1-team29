@@ -1,0 +1,4 @@
+---
+- hosts: ravop-nginx
+  roles:
+    - setup_nginx

@@ -1,0 +1,6 @@
+---
+   - name: Copy production configuration
+     template:
+       dest: "{{ app_home }}/ravop-plugins/telegram/prod.env"
+       src: prod.env.j2
+       owner: "{{ app_user }}"

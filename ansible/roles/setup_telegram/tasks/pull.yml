@@ -1,0 +1,7 @@
+---
+   - name: Pull changes from repo
+     command: "git pull"
+     args:
+       chdir: "{{ app_home }}/ravop-plugins"
+     become: yes
+     become_user: "{{ app_user }}"    

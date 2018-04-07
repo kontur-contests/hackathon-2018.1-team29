@@ -1,0 +1,4 @@
+---
+- hosts: ravop-postgresql
+  roles:
+    - setup_postgresql

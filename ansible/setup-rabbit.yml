@@ -1,0 +1,4 @@
+---
+- hosts: ravop-rabbit
+  roles:
+    - setup_rabbit

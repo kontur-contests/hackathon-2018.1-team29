@@ -1,0 +1,67 @@
+---
+   - name: "Install ansible"
+     raw: "{{ item }}"
+     with_items:
+       - apt update
+       - apt install -y software-properties-common
+       - apt-add-repository -y ppa:ansible/ansible
+       - apt update
+       - apt install -y ansible
+ 
+   - name: Update and Upgrade apt packages
+     apt:
+       update_cache: "yes"
+       upgrade: "yes"
+
+   - name: Install common packages
+     apt:
+       name: "{{ item }}"
+     with_items:
+     - expect
+     - curl
+     - git
+     - iptables-persistent
+
+   - name: Configure netfilter
+     command: "{{ item }}"
+     with_items:
+     - iptables -F
+     - iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+     - iptables -A INPUT -i lo -p all -j ACCEPT
+     - iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+     - iptables -P INPUT DROP
+     - netfilter-persistent save
+
+   - name: Download filebeat
+     get_url:
+       url: "{{ filebeat_distr }}"
+       dest: /var/tmp/filebeat.deb
+
+   - name: Install filebeat
+     command: "{{ item }}"
+     with_items:
+      - apt install -y /var/tmp/filebeat.deb
+
+   - name: Configure filebeat
+     template:
+       src: filebeat.yml.j2
+       dest: /etc/filebeat/filebeat.yml
+     when: ravop_logstash is defined
+  
+   - name: Make filebeat config directory
+     file:
+       state: directory
+       path: /etc/filebeat/configs
+     when: ravop_logstash is defined
+
+   - name: Enable filebeat
+     command: systemctl enable filebeat.service
+     when: ravop_logstash is defined
+
+   - name: Reboot Server
+     command: shutdown -r
+
+   - name: Wait for server to come back
+     wait_for_connection:
+       delay: 70
+       timeout: 120

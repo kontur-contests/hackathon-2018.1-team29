@@ -1,0 +1,4 @@
+---
+- hosts: ravop-mongodb
+  roles:
+    - setup_mongodb

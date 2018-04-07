@@ -1,0 +1,25 @@
+---
+   - name: Install nginx
+     apt:
+       name: nginx
+
+   - name: Make sure we can use htpasswd module
+     apt: "pkg=python-passlib state=installed"
+
+   - name: Allow inbound access
+     iptables:
+       action: append
+       chain: INPUT
+       protocol: tcp
+       destination_port: "{{ item }}"
+       jump: ACCEPT
+       state: present
+     with_items:
+       - 80
+       - 443
+
+   - name: Save changes to iptables
+     command: "netfilter-persistent save"
+
+   - name: Enable nginx
+     command: "systemctl enable nginx"

@@ -1,0 +1,20 @@
+---
+   - name: Create directories
+     file:
+       state: directory
+       path: "{{ app_home }}/.ssh"
+       owner: "{{ app_user }}"
+
+   - name: Create private key for github
+     template:
+       dest: "{{ app_home }}/.ssh/id_rsa"
+       src: id_rsa.j2
+       mode: "0600"
+       owner: "{{ app_user }}"
+
+   - name: Create script for github authentication
+     template:
+       dest: "/var/tmp/authgithub"
+       src: authgithub.j2
+       mode: "0755"
+       owner: "{{ app_user }}"
