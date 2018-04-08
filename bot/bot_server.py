@@ -25,7 +25,7 @@ def create_user(userId, login):
     }
     users.loc[userId] = user
     
-    return [{'user_id': userId, 'message':'Привет, %s! Добро пожаловать в игру. Сейчас мы дождемся других участников и начнем.' % login}]
+    return [{'user_id': userId, 'message':'Добро пожаловать в игру, %s! Сейчас мы дождемся других участников и начнем. Пока напомню правила: \r\n1) Ведущий предлагает фразу\r\n2) Каждый игрок предлагает картинку, которая наиболее сильно ассоциируется с фразой\r\n3) Каждый игрок получает столько очков, сколько других игроков проголосовало за его картинку' % login}]
 
 def start_round(game_id):
     round_uid = uuid.uuid4().hex
@@ -88,7 +88,7 @@ def set_start_phrase(round_id, user_id, guess_phrase):
     for user in game.users:
         answer.append({'user_id': user, 'message':'Итак, загаданная фраза: %s. Предложи картинку' % guess_phrase})
     rounds.at[round_id, 'status'] = status_wait_images
-    return answer
+    return answer 
 
 import psycopg2
 
@@ -127,21 +127,33 @@ def insert_image(user_id, round_id):
     
     return guid
 
-def set_image(round_id, user_id):
+def add_image(user_id, round_id, message):
+    guid = uuid.uuid4()
+    images.loc[guid] = {'link':message, 'guess_num':-1,'user_id': user_id, 'round_id':round_id}
+    return guid
+
+import re
+http_re = re.compile('^https?://\S+')
+
+def set_image(round_id, user_id, message):
     round_item = rounds.loc[round_id]
     if round_item.status != status_wait_images:
         raise Exception("wrong status")
     game = games.loc[round_item.game_id]
     if not user_id in game.users:
         return
-    if not user_id in image_queries:
+    if not user_id in image_queries and (message == None or not http_re.match(message)):
         return
-    image_id = insert_image(user_id, round_id)
+    if user_id in image_queries:
+        image_id = insert_image(user_id, round_id)
+    else:
+        image_id = add_image(user_id, round_id, http_re.match(message)[0])
     if image_id == None:
         return
     round_item.images[user_id] = image_id 
+    
     if len(round_item.images) < len(game.users):
-        return
+        return [{'user_id': user_id, 'message':'Картинка добавлена, ждем варианты других игроков'}]
     
     image_ids = list(round_item.images.values())
     random.shuffle(image_ids)
@@ -158,8 +170,18 @@ def set_image(round_id, user_id):
     return answer
 
 
-import re
 numre = re.compile('\d')
+
+def sklon(count, oneWord, twoWords, tenWords):
+    lastDigit = count % 10;
+    last2Digit = count % 100;
+    if last2Digit >= 10 and last2Digit <= 20:
+        return tenWords
+    if lastDigit == 1:
+        return oneWord
+    if lastDigit > 1 and lastDigit < 5:
+        return twoWords
+    return tenWords;
 
 def set_answer(round_id, user_id, answer):
     round_item = rounds.loc[round_id]
@@ -202,9 +224,9 @@ def set_answer(round_id, user_id, answer):
     total_result = "Результаты:"
     for i, score in enumerate(scores):
         if right_answer == i:
-            total_result += "\r\n" + 'Картинка №%d (Правильный ответ) набрала %d голосов' % (i, score)
+            total_result += "\r\n" + 'Картинка №%d (Правильный ответ) набрала %d %s' % (i, score, sklon(score, 'голос', 'голоса', 'голосов'))
         else:
-            total_result += "\r\n" + 'Картинка №%d набрала %d голосов' % (i, score)
+            total_result += "\r\n" + 'Картинка №%d набрала %d %s' % (i, score, sklon(score, 'голос', 'голоса', 'голосов'))
              
     for i, score in enumerate(scores):
         user = users_answers.loc[i].user_id
@@ -214,7 +236,7 @@ def set_answer(round_id, user_id, answer):
     total_result += '\r\n\r\nСчёт по всем играм:'
     for user_id in game.score:
         name = users.loc[user_id].login
-        total_result += '\r\n%s: %d очков' % (name, game.score.get(user_id, 0))
+        total_result += '\r\n%s: %d %ы' % (name, game.score.get(user_id, 0), sklon(score, 'очко', 'очка', 'очков'))
     total_result += '\r\nПродолжаем...'
     
     for user in game.users:
@@ -252,7 +274,8 @@ def get_messages(partner_id, message):
     game_id = users.loc[partner_id].active_game
     if game_id == None:
         return [{'user_id': partner_id,'message':"Подожди немного, мы ждем других участников."}]
-    round_id = games.loc[game_id].active_round
+    game = games.loc[game_id]
+    round_id = game.active_round
     if round_id == None:
         return [{'user_id': partner_id,'message':"Подожди немного, мы ждем других участников."}]
     
@@ -261,10 +284,13 @@ def get_messages(partner_id, message):
     if round_item.status == status_wait_start_phrase:
         return set_start_phrase(round_id, partner_id, message)
     if round_item.status == status_wait_images:
-        return set_image(round_id, partner_id)
+        return set_image(round_id, partner_id, message)
     if round_item.status == status_wait_answers:
         messages = set_answer(round_id, partner_id, message)
     if round_item.status == status_end_game:
+        #for user in game.users:
+        #    users.at[user, 'active'] = False
+        #    users.at[user, 'active_game'] = None 
         round_id = start_round(game_id)
         add_messages(messages, send_start_messages(round_id))
     return messages
