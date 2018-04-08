@@ -1,4 +1,22 @@
 ---
+   - name: Check if known_hosts exists
+     stat:
+       path: "{{ app_home }}/.ssh/known_hosts"
+     register: known_hosts
+
+   - name: Clean known_hosts from github.com public key
+     command: 'ssh-keygen -R github.com'
+     become: yes
+     become_user: "{{ app_user }}"
+     when: known_hosts.stat.exists == True
+
+   - name: Authenticate at repo
+     command: "/var/tmp/authgithub"
+     args:
+       chdir: "{{ app_home }}"
+     become: yes
+     become_user: "{{ app_user }}"
+
    - name: Clone repo
      command: "/usr/bin/git clone git@github.com:skbkontur/hackathon-2018.1-team29.git {{ app_home }}/hackaton"
      become: yes

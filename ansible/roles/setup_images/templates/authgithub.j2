@@ -1,0 +1,7 @@
+#!/usr/bin/expect
+spawn /usr/bin/ssh -T git@github.com
+expect "Are you sure you want to continue connecting (yes/no)?"
+send "yes\r"
+expect "Hi lspliner/ravop-plugins! You've successfully authenticated, but GitHub does not provide shell access."
+exit
+
