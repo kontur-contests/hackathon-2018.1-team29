@@ -4,7 +4,7 @@ import random
 import pandas as pd
 import datetime
 
-players_count=3
+players_count=4
 
 status_start = 'start_message'
 status_wait_start_phrase = 'wait_start_phrase'
@@ -182,13 +182,18 @@ def set_image(round_id, user_id, message):
         return
     if not user_id in image_queries and (message == None or not http_re.match(message)):
         return [{'user_id': user_id, 'message':'Нужна картинка. Любая картинка'}]
+        
+    if user_id in round_item.images:
+        return [{'user_id': user_id, 'message':"Мы ждем картинки от других участников! Нам тоже не терпится их все посмотреть."}]
+        
     if user_id in image_queries:
         image_id = insert_image(user_id, round_id)
     else:
         image_id = add_image(user_id, round_id, http_re.match(message)[0])
     if image_id == None:
         return [{'user_id': user_id, 'message':'Нужна картинка. Любая картинка'}]
-    round_item.images[user_id] = image_id 
+    round_item.images[user_id] = image_id
+    
     
     if len(round_item.images) < len(game.users):
         return [{'user_id': user_id, 'message':'Картинка добавлена, ждем варианты других игроков'}]
@@ -201,7 +206,7 @@ def set_image(round_id, user_id, message):
     
     answer = []
     for user in game.users:
-        answer.append({'user_id': user, 'message':'Итак, варианты ответов:'})
+        answer.append({'user_id': user, 'message':'Итак, выбираем вариант ответов:'})
         for i, image_id in enumerate(image_ids):
             answer.append({'user_id': user, 'message':'%d) %s' % (images.loc[image_id].guess_num, images.loc[image_id].link)})
     rounds.at[round_id, 'status'] = status_wait_answers
@@ -228,6 +233,9 @@ def set_answer(round_id, user_id, answer):
     game = games.loc[round_item.game_id]
     if not user_id in game.users:
         return None
+        
+    if user_id in round_item.messages:
+        return [{'user_id': user_id, 'message':"Вы быстрее всех! А мы ждем ответы других участников."}]
     
     match = numre.search(answer)
     if match == None:
@@ -248,6 +256,12 @@ def set_answer(round_id, user_id, answer):
     
     if len(round_item.messages) < len(game.users):
         return answer
+
+    return get_game_results(round_id)
+
+def get_game_results(round_id):     
+    round_item = rounds.loc[round_id]
+    game = games.loc[round_item.game_id]
     
     interesting_images = images[images.round_id == round_id]
     
@@ -279,6 +293,8 @@ def set_answer(round_id, user_id, answer):
     for user_id in game.users:
         name = users.loc[user_id].login
         total_result += '\r\n%s: %d %s' % (name, users.loc[user_id].score, sklon(users.loc[user_id].score, 'очко', 'очка', 'очков'))
+    
+    answer = []
     
     for user in game.users:
         answer.append({'user_id':user,'message':total_result})
@@ -331,7 +347,8 @@ def run_game_cycle(partner_id, message):
     
     round_item = rounds.loc[round_id]
     
-    if get_round_timeout(round_id) > 100:
+    if get_round_timeout(round_id) > 200:
+        messages = get_game_results(round_id)
         round_item.status = status_end_game
         for user in game.users:
             users.at[user, 'active'] = False
